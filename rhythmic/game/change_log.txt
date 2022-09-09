@@ -1,0 +1,56 @@
+Alpha 0.11.0
+	+ Practice Mode!!!!!
+	+ Whammy WiBbLe
+	+ Side bars
+	+ Resume reverse effect is faster
+	+ New syncing code
+	+ New input system
+	+ New menu system
+	+ In game song progress
+	+ Note streak counter
+	+ Stats now shows percentage of each section
+	+ Added small front end to hopos/taps
+	+ Rhythmic Icon on window
+	+ Ability to customize engine timing
+	+ Ability to save and share these values
+	+ Modifiers
+	+ Windows: Rhythmic Icon of exe
+	- No more JSON config files
+	* MusicPlayer now plays drums_4 audio
+	* MusicPlayer now plays keys audio
+	* Fixed midi charts crashing with some cymbal notes
+	* Lots of back end stuff rewritten
+	* GLFW used instead of SDL
+
+
+Alpha 0.10.0
+	- Added midi chart support
+	- Added cymbal notes
+	- Rewritten the drums gameplay
+	- Five lane drums use cymbals as visuals
+	- Songs now require a song.ini
+	- Rhythmic will generate a simple ini with .chart files
+	- Players can now change settings by activating the option and pressing/strumming up or down
+	- Player setting to show hit window
+	- Added a search feature in the song selection menu (press button bound to Select)
+	- Fixed chart parser crashing Rhythmic with some charts
+	- Windows builds now produce a crash.dmp file when game crashes
+	- Changed menu font
+
+Alpha 0.9.0
+	- Removed infinite front range of HOPOs/Taps
+	- Added fretboard effects (wobbles and bounces)
+	- Added support for animated sprites
+	- Added hit feedback animation
+	- Added starpower hit feedback animation
+	- Added new monospaced font for score in game
+	- Added lefty flip
+	- Added button bindings configurator (double click the window while you are on the main menu)
+	- Added ability to save and load button bindings
+	- Added ability to tie your controller to a saved button config
+	- Added new menu system (supports 3D and 2D menus, but 3D has been disabled for now)
+	- Game gives 1.5 second space before song starts (instead of 2)
+	- Moved fonts to themes
+	- Fixed chart parser having trouble with some charts
+	- Fixed incorrect highway positions when there are more than 2 players
+	- Fixed guitars not working on linux (this may break default binding compatibility)

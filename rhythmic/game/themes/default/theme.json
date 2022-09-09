@@ -1,0 +1,20 @@
+{
+	"theme": {
+		"name": "Rhythmic Default",
+		"allows_custom_colors": true,
+
+		"menu": {
+			"is_3d": false
+		},
+		
+		"sprites": {
+		  "highway_elements": "highway_elements.png",
+		  "highway_elements_tiles": [ 40, 40 ]
+		},
+
+		"fonts": {
+		  "menus": "FallingSky.ttf",
+		  "score": "Aurulent-Sans-Mono-Regular.ttf"
+		}
+	}
+}

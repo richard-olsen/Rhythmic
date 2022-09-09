@@ -1,0 +1,3 @@
+Rhythmic loads ttf files
+
+While it can load otf, the library being used doesn't support them well. Fonts may seem off (incorrect spacing is one of the side effects)
