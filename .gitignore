@@ -447,6 +447,7 @@ rhythmic/game/logs/log
 rhythmic/game/custom/backgrounds/images/*.png
 rhythmic/game/custom/backgrounds/images/*.jpg
 rhythmic/game/custom/backgrounds/images/*.jpeg
+!rhythmic/game/fretboards/default.png
 
 #Ignore GENERATED custom files
 *.engine
