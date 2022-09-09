@@ -456,5 +456,7 @@ rhythmic/game/custom/backgrounds/images/*.jpeg
 bin/
 bin64/
 
-!libs/64/OpenAL.lib
-!libs/64/OpenAL.dll
+!libs/64/bass.lib
+!libs/64/bass.dll
+!libs/32/bass.lib
+!libs/32/bass.dll
