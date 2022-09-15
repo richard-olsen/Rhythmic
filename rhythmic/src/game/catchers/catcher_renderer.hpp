@@ -17,6 +17,7 @@ namespace Rhythmic
 		void Init();
 
 		void RenderCatchers(CatcherManager &manager, bool hitsOnly, bool flip);
+		void Render6Foot(const Catcher& catcher, int activeCatchers, const glm::vec2& pos, int index, bool flip, bool add_joint);
 		void RenderCatcher(const Catcher &catcher, const glm::vec2 &pos, int index, bool flip, bool add_joint);
 	private:
 		SheetReference				 m_highwayElements;

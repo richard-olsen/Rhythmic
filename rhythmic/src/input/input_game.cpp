@@ -6,11 +6,12 @@ namespace Rhythmic
 		/*
 		All instruments have these buttons (with the exception of Pro Keys)
 		*/
-		"Green",			// Accept
-		"Red",				// Back
-		"Yellow",			// Sort
-		"Blue",				// Search
-		"Orange",			// Change Category
+		"Green/B1",			// Accept
+		"Red/B2",				// Back
+		"Yellow/B3",			// Sort
+		"Blue/W1",				// Search
+		"Orange/W2",			// Change Category
+		"White3",			// 6 fret
 
 		"Select",
 		"Start",

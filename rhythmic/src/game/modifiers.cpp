@@ -17,7 +17,7 @@ namespace Rhythmic
 
 	void ApplyModifiers(Instrument *instrument, int modifiers, bool is4Lane) {
 		NotePool *notePool = instrument->GetNotePoolTemplate();
-		if (instrument->GetInstrumentType() == INSTRUMENT_TYPE_GUITAR || instrument->GetInstrumentType() == INSTRUMENT_TYPE_BASS) {
+		if (instrument->GetInstrumentType() == INSTRUMENT_TYPE_GUITAR || instrument->GetInstrumentType() == INSTRUMENT_TYPE_BASS || instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRET || instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRETBASS) {
 			if (IS_MODIFIER(modifiers, ALL_STRUMS)) ConvertAllToType(*notePool, NOTE_FLAG_STRUM);
 			if (IS_MODIFIER(modifiers, ALL_HOPOS)) ConvertAllToType(*notePool, NOTE_FLAG_HOPO);
 			if (IS_MODIFIER(modifiers, ALL_TAPS)) ConvertAllToType(*notePool, NOTE_FLAG_TAP);
@@ -185,6 +185,69 @@ namespace Rhythmic
 				// 5 Lane
 			}
 		}
+		else if (instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRET || instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRETBASS) {
+			std::random_device device;
+			std::mt19937 engine(device());
+			std::uniform_int_distribution<int> dist(0, 5);
+
+			unsigned int i = 0;
+			while (i < notePool.size())
+			{
+				int chordEnding = GetChordEndingIndex(notePool, i);
+
+				int shuffle = 0; // Bitfield
+
+				bool bar1 = false, bar2 = false, bar3 = false;
+				int barone = 0, bartwo = 0, barthree = 0;
+
+
+				for (int index = 0; index < chordEnding; index++) {
+					Note& note = notePool[i + index];
+					note.isBar = false;
+
+					if (note.note == NOTE_OPEN) continue;
+
+					do {
+						auto const random = dist(engine);
+						note.note = random;
+
+					} while (shuffle & (1 << note.note));
+
+					if (bar1 && (note.note == NOTE_1 || note.note == NOTE_4)) {
+						note.isBar = true;
+						Note& temp = notePool[i + barone];
+						temp.isBar = true;
+					}
+					else if (bar2 && (note.note == NOTE_2 || note.note == NOTE_5)) {
+						note.isBar = true;
+						Note& temp = notePool[i + bartwo];
+						temp.isBar = true;
+					}
+					else if (bar3 && (note.note == NOTE_3 || note.note == NOTE_6)) {
+						note.isBar = true;
+						Note& temp = notePool[i + barthree];
+						temp.isBar = true;
+					}
+
+					if (note.note == NOTE_1 || note.note == NOTE_4) {
+						bar1 = true;
+						barone = index;
+					}
+					else if (note.note == NOTE_2 || note.note == NOTE_5) {
+						bar2 = true;
+						bartwo = index;
+					}
+					else if (note.note == NOTE_3 || note.note == NOTE_6) {
+						bar3 = true;
+						barthree = index;
+					}
+
+					shuffle |= (1 << note.note);
+				}
+
+				i += chordEnding;
+			}
+		}
 		
 	}
 
@@ -235,6 +298,30 @@ namespace Rhythmic
 				// 5 Lane
 			}
 			
+		}
+		else if (instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRET || instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRETBASS) {
+			for (Note& note : notePool) {
+				switch (note.note) {
+				case NOTE_1:
+					note.note = NOTE_6;
+					break;
+				case NOTE_2:
+					note.note = NOTE_5;
+					break;
+				case NOTE_3:
+					note.note = NOTE_4;
+					break;
+				case NOTE_4:
+					note.note = NOTE_3;
+					break;
+				case NOTE_5:
+					note.note = NOTE_2;
+					break;
+				case NOTE_6:
+					note.note = NOTE_1;
+					break;
+				}
+			}
 		}
 
 	}
@@ -420,6 +507,142 @@ namespace Rhythmic
 			}
 			else {
 				// 5 Lane
+			}
+		}
+		if (instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRET || instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRETBASS) {
+			unsigned int i = 0;
+			while (i < notePool.size())
+			{
+				int chordEnding = GetChordEndingIndex(notePool, i);
+
+				if (chordEnding == 1) { // Single note
+					Note doubleNote = notePool[i];
+
+					if (notePool[i].note != NOTE_OPEN)
+					{
+						switch (doubleNote.note)
+						{
+						case NOTE_1:
+							doubleNote.note = NOTE_2;
+							break;
+						case NOTE_2:
+							doubleNote.note = NOTE_3;
+							break;
+						case NOTE_3:
+							doubleNote.note = NOTE_4;
+							break;
+						case NOTE_4:
+							doubleNote.note = NOTE_5;
+							break;
+						case NOTE_5:
+							doubleNote.note = NOTE_6;
+							break;
+						case NOTE_6:
+							doubleNote.note = NOTE_4;
+							break;
+						}
+
+						notePool[i].flags |= NOTE_FLAG_IS_CHORD;
+						doubleNote.flags |= NOTE_FLAG_IS_CHORD;
+
+						notePool.emplace(std::next(notePool.begin(), i), doubleNote);
+
+						i += chordEnding + 1;
+					}
+					else i++;
+				}
+				else if (chordEnding == 2) {
+					Note start = notePool[i];
+					Note end = notePool[i + chordEnding - 1];
+
+					Note doubleNote = notePool[i];
+					if (doubleNote.isBar) doubleNote.isBar = false;
+
+					doubleNote.flags |= NOTE_FLAG_IS_CHORD;
+
+					switch (start.note) {
+					case NOTE_1:
+						switch (end.note) {
+						case NOTE_2:
+							doubleNote.note = NOTE_3; // 
+							break;
+						case NOTE_3:
+							doubleNote.note = NOTE_4; // 
+							doubleNote.isBar = true;
+							start.isBar = true;
+							break;
+						case NOTE_4:
+							doubleNote.note = NOTE_5; // 
+							break;
+						case NOTE_5:
+							doubleNote.note = NOTE_6; // 
+							break;
+						case NOTE_6:
+							doubleNote.note = NOTE_4; // 
+							doubleNote.isBar = true;
+							start.isBar = true;
+							break;
+						}
+					case NOTE_2:
+						switch (end.note) {
+						case NOTE_3:
+							doubleNote.note = NOTE_4; // 
+							break;
+						case NOTE_4:
+							doubleNote.note = NOTE_5; // 
+							doubleNote.isBar = true;
+							start.isBar = true;
+							break;
+						case NOTE_5:
+							doubleNote.note = NOTE_6; // 
+							break;
+						case NOTE_6:
+							doubleNote.note = NOTE_5; // 
+							doubleNote.isBar = true;
+							start.isBar = true;
+							break;
+						}
+						break;
+					case NOTE_3:
+						switch (end.note) {
+						case NOTE_4:
+							doubleNote.note = NOTE_5; // 
+							break;
+						case NOTE_5:
+							doubleNote.note = NOTE_6; // 
+							doubleNote.isBar = true;
+							start.isBar = true;
+							break;
+						case NOTE_6:
+							doubleNote.note = NOTE_4; // 
+							break;
+						}
+						break;
+					case NOTE_4:
+						switch (end.note) {
+						case NOTE_5:
+							doubleNote.note = NOTE_6; // 
+							break;
+						case NOTE_6:
+							doubleNote.note = NOTE_2; // 
+							break;
+						}
+						break;
+					case NOTE_5:
+						switch (end.note) {
+						case NOTE_6:
+							doubleNote.note = NOTE_1; // 
+							break;
+						}
+						break;
+					}
+					
+
+					notePool.emplace(std::next(notePool.begin(), i), doubleNote);
+					i += chordEnding + 1;
+				}
+				else
+					i += chordEnding;
 			}
 		}
 	}

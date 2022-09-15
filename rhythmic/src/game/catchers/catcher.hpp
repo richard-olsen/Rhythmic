@@ -10,6 +10,7 @@ namespace Rhythmic
 		CATCHER_TYPE_YELLOW,
 		CATCHER_TYPE_BLUE,
 		CATCHER_TYPE_ORANGE,
+		CATCHER_TYPE_WHITE
 	};
 
 	const float g_catcher_hitHeight = 0.075f;

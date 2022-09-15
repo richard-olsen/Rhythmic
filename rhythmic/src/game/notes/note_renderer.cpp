@@ -24,7 +24,7 @@ namespace Rhythmic
 
 	float NoteRenderer::GetX(const Note &note, unsigned int catcherCount)
 	{
-		if (note.note == 5)
+		if (note.note == 6)
 			return 0;
 		if (catcherCount == 4)
 		{
@@ -50,6 +50,21 @@ namespace Rhythmic
 			else if (note.note == NOTE_5)
 				return CATCHER_POS_5_5;
 		}
+		else if (catcherCount == 6)
+		{
+			if (note.note == NOTE_1)
+				return CATCHER_POS_6_1;
+			else if (note.note == NOTE_2)
+				return CATCHER_POS_6_2;
+			else if (note.note == NOTE_3)
+				return CATCHER_POS_6_3;
+			if (note.note == NOTE_4)
+				return CATCHER_POS_6_4;
+			else if (note.note == NOTE_5)
+				return CATCHER_POS_6_5;
+			else if (note.note == NOTE_6)
+				return CATCHER_POS_6_6;
+		}
 		return 0;
 	}
 	void NoteRenderer::RenderNotes(CatcherManager &cManager, const std::vector<Note> &notePool, float timeOffset, unsigned int noteCutoff, bool isStarpower, bool flip, float noteSpeed, unsigned int viewDistance)
@@ -58,6 +73,7 @@ namespace Rhythmic
 			return;
 		//unsigned int size = notePool.Size();
 		bool drums = cManager.IsDrums();
+		bool six = cManager.IsSix();
 
 		// This rendering should be more efficient. Instead of iterating from the end to the cutoff, it starts at the cutoff and goes until the note is out of range
 		unsigned int start = noteCutoff;
@@ -81,10 +97,19 @@ namespace Rhythmic
 			if (IS_NOTE(note, NOTE_FLAG_HIT))
 				continue;
 
-			if (note.note != NOTE_OPEN && note.note < 5)
+			if (note.note != NOTE_OPEN && note.note < 5 && !six)
 			{
 				Catcher *catcher = cManager[note.note];
 				RenderNote(*catcher, note, GetX(note, cManager.Size()) * (flip ? -1 : 1), isStarpower ? glm::vec4(0, 1, 1, 1) : g_colors[catcher->type], drums, timeOffset, noteSpeed);
+			}
+			else if (six && note.note != NOTE_OPEN && note.note < 6) //if playing 6 fret chart
+			{
+				Catcher* catcher = cManager[note.note];
+				bool isBar = note.isBar;
+				if (note.note < NOTE_4 && isBar) {
+					continue; //stops from rendering bar note twice
+				}
+				RenderSixNote(*catcher, note, GetX(note, cManager.Size()) * (flip ? -1 : 1), isBar, timeOffset, noteSpeed);
 			}
 			else
 			{
@@ -117,6 +142,36 @@ namespace Rhythmic
 		{
 			m_highwayElements.data->AddSprite((useCymbal || !drum) ? 2 : 0, 11, 2, 1, pos, size, glm::vec4(0, 1, 1, 1));
 		}
+		
+		
+		m_batcher->Update();
+		m_batcher->Draw();
+	}
+	
+	void NoteRenderer::RenderSixNote(const Catcher& catcher, const Note& note, float x, bool isBar, float timeOffset, float noteSpeed)
+	{
+		m_billboard->SetPointCenter(glm::vec3(x, ((note.time - timeOffset) * noteSpeed) + g_themeVars.highway.element_correction_note_time_offset, 0));
+		m_batcher->Clear();
+
+		glm::vec2 pos = glm::vec2(-g_themeVars.highway.note_size.x * 0.5f, g_themeVars.highway.note_size.y - (g_themeVars.highway.element_y_pixel_size * g_themeVars.highway.element_correction_note));
+		glm::vec2 size = glm::vec2(g_themeVars.highway.note_size.x, -g_themeVars.highway.note_size.y);
+
+		if (IS_NOTE(note, NOTE_FLAG_TAP)) {
+
+			m_highwayElements.data->AddSprite((isBar ? 0 : 2), 12, 2, 1, pos, size, (!isBar ? (note.note > 2 ? g_white : g_black) : g_lb));
+			m_highwayElements.data->AddSprite((isBar ? 0 : 2), 9, 2, 1, pos, size, g_white);
+		}
+		else {
+			m_highwayElements.data->AddSprite((isBar ? 0 : 2), 10, 2, 1, pos, size, (!isBar ? (note.note > 2 ? g_white : g_black) : g_lb));
+			m_highwayElements.data->AddSprite((isBar ? 0 : 2), 9, 2, 1, pos, size, g_white);
+			if (IS_NOTE(note, NOTE_FLAG_HOPO))
+				m_highwayElements.data->AddSprite((isBar ? 0 : 2), 13, 2, 1, pos, size, (!isBar ? (note.note > 2 ? g_lgrey : g_dgrey) : g_lbsp * 2.0f));
+		}
+		if (IS_NOTE(note, NOTE_FLAG_IS_STARPOWER)) {
+			m_highwayElements.data->AddSprite((isBar ? 0 : 2), 11, 2, 1, pos, size, glm::vec4(0, 1, 1, 1));
+		}
+		
+
 
 		m_batcher->Update();
 		m_batcher->Draw();
@@ -156,7 +211,7 @@ namespace Rhythmic
 		m_batcher->Draw();
 	}
 
-	void NoteRenderer::RenderSustains(CatcherManager &cManager, const std::vector<Note> &notePool, float timeOffset, unsigned int noteCutoff, const std::vector<unsigned int> &activeSustains, const std::vector<SustainMissData> &missedSustains, const std::deque<WhammyEffectData> &whammyEffectData, bool isStarpower, bool flip, float noteSpeed, unsigned int viewDistance)
+	void NoteRenderer::RenderSustains(CatcherManager &cManager, const std::vector<Note> &notePool, float timeOffset, unsigned int noteCutoff, const std::vector<unsigned int> &activeSustains, const std::vector<SustainMissData> &missedSustains, const std::deque<WhammyEffectData> &whammyEffectData, bool isStarpower, bool flip, bool six, float noteSpeed, unsigned int viewDistance)
 	{
 		// Need a way to render active sustains
 		bool drums = cManager.IsDrums();
@@ -167,6 +222,9 @@ namespace Rhythmic
 			if (activeSustains[i] > notePool.size())
 				break;
 			const Note &note = notePool[activeSustains[i]];
+
+			
+
 			if (note.time - timeOffset > viewDistance || note.sustain - timeOffset < -1)
 				continue;
 			if (note.sustain > note.time)
@@ -174,7 +232,15 @@ namespace Rhythmic
 				if (note.note != NOTE_OPEN)
 				{
 					Catcher *catcher = cManager[note.note];
-					RenderSustain(note, GetX(note, cManager.Size()) * (flip ? -1 : 1), 0.25f, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[catcher->type] : g_colors[catcher->type], timeOffset, noteSpeed, false, note.lastScoreCheck, whammyEffectData, true, 1.0f);
+					if (!six) {
+						RenderSustain(note, GetX(note, cManager.Size()) * (flip ? -1 : 1), 0.25f, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[catcher->type] : g_colors[catcher->type], timeOffset, noteSpeed, false, note.lastScoreCheck, whammyEffectData, true, 1.0f);
+					}			
+					else {
+						if (note.note < NOTE_4 && note.isBar) {
+							continue; //stops from rendering bar note twice
+						}
+						RenderSustain(note, GetX(note, cManager.Size()) * (flip ? -1 : 1), 0.25f, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[0] : (note.note > NOTE_3 ? (note.isBar ? g_lb : g_white) : g_black), timeOffset, noteSpeed, false, note.lastScoreCheck, whammyEffectData, true, 1.0f);
+					}
 				}
 				else
 				{
@@ -232,14 +298,24 @@ namespace Rhythmic
 
 			if (note.sustain > note.time)
 			{
-				if (note.note != NOTE_OPEN && note.note <= 4)
+				if (note.note != NOTE_OPEN && note.note <= 5)
 				{
 					Catcher *catcher = cManager[note.note];
-					RenderSustain(note, GetX(note, cManager.Size()) * (flip ? -1 : 1), 0.25f, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[catcher->type] : g_colors[catcher->type], timeOffset, noteSpeed, false, 0, whammyEffectData, false, 1.0f);
+
+					if (!six) {
+						RenderSustain(note, GetX(note, cManager.Size()) * (flip ? -1 : 1), 0.25f, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[catcher->type] : g_colors[catcher->type], timeOffset, noteSpeed, false, 0, whammyEffectData, false, 1.0f);
+					}
+					else {
+						if (note.note < NOTE_4 && note.isBar) {
+							continue; //stops from rendering bar note twice
+						}
+						RenderSustain(note, GetX(note, cManager.Size()) * (flip ? -1 : 1), 0.25f, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[0] : (note.note > NOTE_3 ? (note.isBar ? g_lb : g_white) : g_black), timeOffset, noteSpeed, false, 0, whammyEffectData, false, 1.0f);
+					}					
 				}
 				else
 				{
 					RenderSustain(note, 0, 2, (isStarpower || IS_NOTE(note, NOTE_FLAG_ADDING_STARPOWER)) ? g_colorsSP[5] : g_colors[5], timeOffset, noteSpeed, false, 0, whammyEffectData, false, 0.4f);
+					
 				}
 			}
 		}

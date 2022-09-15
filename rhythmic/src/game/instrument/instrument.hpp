@@ -393,8 +393,8 @@ namespace Rhythmic
 
 		bool							m_ignoreRange;							// Tells the instrument to or not to ignore the range (if true, notes will not be removed when they pass a certain point)
 
-		Animator						m_animStarHit[6];						// Enough for 5 pads and the open/kick note (just in case, I might not even have one for it?)
-		Animator						m_animHit[6];							// Enough for 5 pads and the open/kick note. The animation when the note is hit (in GH it's a flame, in RB it's some broken glass)
+		Animator						m_animStarHit[7];						// Enough for 5 pads and the open/kick note (just in case, I might not even have one for it?)
+		Animator						m_animHit[7];							// Enough for 5 pads and the open/kick note. The animation when the note is hit (in GH it's a flame, in RB it's some broken glass)
 
 		Effect							m_effectBounce;
 		Effect							m_effectWobble;

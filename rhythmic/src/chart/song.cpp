@@ -86,7 +86,9 @@ namespace Rhythmic
 			c.listTS[i].time = GetAdjustedTimeFromPosition(c.listTS[i].position, c);
 		}
 
-		for (int i = 0; i < 3; i++)
+		//6 instruments
+		//4 difficulties
+		for (int i = 0; i < 5; i++)
 		{
 			for (int j = 0; j < 4; j++)
 			{

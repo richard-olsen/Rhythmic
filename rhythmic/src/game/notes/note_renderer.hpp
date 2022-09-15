@@ -36,12 +36,13 @@ namespace Rhythmic
 		float GetX(const Note &note, unsigned int catcherCount);
 		void RenderNotes(CatcherManager &cManager, const std::vector<Note> &notes, float timeOffset, unsigned int noteCutoff, bool isStarpower, bool flip, float noteSpeed = 1.0f, unsigned int viewDistance = 7);
 		void RenderNote(const Catcher &catcher, const Note &note, float x, const glm::vec4 &color, bool drum, float timeOffset, float noteSpeed);
+		void RenderSixNote(const Catcher& catcher, const Note& note, float x, bool isBar, float timeOffset, float noteSpeed);
 		void RenderNoteOpen(const Note &note, const glm::vec4 &color, float timeOffset, float noteSpeed);
 
-		void RenderSustains(CatcherManager &cManager, const std::vector<Note> &notePool, float timeOffset, unsigned int noteCutoff, const std::vector<unsigned int> &activeSustains, const std::vector<SustainMissData> &missedSustains, const std::deque<WhammyEffectData> &whammyEffectData, bool isStarpower, bool flip, float noteSpeed = 1.0f, unsigned int viewDistance = 7);
+		void RenderSustains(CatcherManager &cManager, const std::vector<Note> &notePool, float timeOffset, unsigned int noteCutoff, const std::vector<unsigned int> &activeSustains, const std::vector<SustainMissData> &missedSustains, const std::deque<WhammyEffectData> &whammyEffectData, bool isStarpower, bool flip, bool six, float noteSpeed = 1.0f, unsigned int viewDistance = 7);
 		//void RenderSustain(const Catcher &catcher, const Note &note, float x, const glm::vec4 &color, bool drum, float timeOffset, float noteSpeed, bool missed, float missTime, const std::vector<WhammyEffectData> &whammyData, bool active = false);
 		//void RenderSustainOpen(const Note &note, const glm::vec4 &color, float timeOffset, float noteSpeed, bool missed, float missTime, const std::vector<WhammyEffectData> &whammyData, bool active = false);
-	
+		
 		void RenderSustain(const Note &note, float x, float size, const glm::vec4 &color, float timeOffset, float noteSpeed, bool missed, float missTime, const std::deque<WhammyEffectData> &whammyData, bool active, float stretchFactor);
 
 		void RenderBeatlines(std::vector<Beatline> &beatlines, float timeOffset, float noteSpeed = 1.0f, unsigned int viewDistance = 7);

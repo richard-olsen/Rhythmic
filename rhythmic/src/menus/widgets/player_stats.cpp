@@ -69,6 +69,12 @@ namespace Rhythmic
 				identifier.append("Pro ");
 			identifier.append("Drums");
 			break;
+		case INSTRUMENT_TYPE_6FRET:
+			identifier.append("6 Fret Guitar");
+			break;
+		case INSTRUMENT_TYPE_6FRETBASS:
+			identifier.append("6 Fret Bass");
+			break;
 		}
 		glm::vec2 position = m_frame.GetPosition() - glm::vec2(0, m_frame.GetScale().y);
 

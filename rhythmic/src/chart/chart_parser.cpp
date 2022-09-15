@@ -103,6 +103,18 @@ namespace Rhythmic
 			targetInstrument = INSTRUMENT_TYPE_DRUMS;
 			nextFlow = ChartFlow::NORMAL;
 		}
+		else if (section == "GHLGuitar")
+		{
+			chart->supports[INSTRUMENT_TYPE_6FRET] = true;
+			targetInstrument = INSTRUMENT_TYPE_6FRET;
+			nextFlow = ChartFlow::NORMAL;
+		}
+		else if (section == "GHLBass")
+		{
+			chart->supports[INSTRUMENT_TYPE_6FRETBASS] = true;
+			targetInstrument = INSTRUMENT_TYPE_6FRETBASS;
+			nextFlow = ChartFlow::NORMAL;
+		}
 	}
 
 	/*
@@ -155,8 +167,15 @@ namespace Rhythmic
 			if (note.note > 5)
 				chart->notesModifiers[instrument][difficulty]++;
 			break;
+		case INSTRUMENT_TYPE_6FRET:
+		case INSTRUMENT_TYPE_6FRETBASS:
+			if (note.note > 6)
+				chart->notesModifiers[instrument][difficulty]++;
+			break;
 		}
+		
 	}
+	
 
 	/*
 	Process all S type of events
