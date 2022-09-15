@@ -15,6 +15,8 @@
 #define INSTRUMENT_TYPE_GUITAR 0
 #define INSTRUMENT_TYPE_BASS 1
 #define INSTRUMENT_TYPE_DRUMS 2
+#define INSTRUMENT_TYPE_6FRET 3
+#define INSTRUMENT_TYPE_6FRETBASS 4
 
 /* Converts chart position into time utilizing BPMs
  x = Chart Position
@@ -34,14 +36,16 @@
 
 namespace Rhythmic
 {
-	const static char *g_instrumentNames[4] = {
+	const static char *g_instrumentNames[6] = {
 		"Guitar",
 		"Bass",
 		"Drums",
+		"6 Fret Guitar"
+		"6 Fret Bass"
 		"Keys"
 	};
 
-	constexpr int INSTRUMENT_COUNT = 3;
+	constexpr int INSTRUMENT_COUNT = 6;
 	constexpr int DIFFICULTY_COUNT = 4;
 
 	constexpr int CHART_NOTE_TRY_HOPO = (1 << 0);

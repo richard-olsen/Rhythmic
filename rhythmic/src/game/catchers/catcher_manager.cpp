@@ -12,13 +12,14 @@ namespace Rhythmic
 	CatcherManager::~CatcherManager()
 	{}
 
-	void CatcherManager::Create(bool drums, unsigned int catchers)
+	void CatcherManager::Create(bool drums, bool six, unsigned int catchers)
 	{
-		assert(catchers == 5 || catchers == 4);
+		assert(catchers == 6 || catchers == 5 || catchers == 4);
 		if (m_size == 0)
 		{
 			m_drums = drums;
-			m_catchers = new Catcher[5];
+			m_six = six;
+			m_catchers = new Catcher[6];
 			m_size = catchers;
 			
 
@@ -40,8 +41,11 @@ namespace Rhythmic
 			m_catchers[2].type = drums ? CATCHER_TYPE_BLUE : CATCHER_TYPE_YELLOW;
 			m_catchers[3].type = drums ? (catchers == 4 ? CATCHER_TYPE_GREEN : CATCHER_TYPE_ORANGE) : CATCHER_TYPE_BLUE;
 			m_catchers[4].type = drums ? CATCHER_TYPE_GREEN : CATCHER_TYPE_ORANGE;
-			
-			for (int i = 0; i < 5; i++)
+			if (six) {
+				m_catchers[5].type = CATCHER_TYPE_WHITE;
+			}
+
+			for (int i = 0; i < 6; i++)
 			{
 				m_catchers[i].hit_height = 0;
 				m_catchers[i].active = false;
@@ -54,7 +58,7 @@ namespace Rhythmic
 		if (m_size <= 0)
 			return;
 
-		for (unsigned int i = 0; i < 5; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			if (m_catchers[i].hit_height > 0)
 				m_catchers[i].hit_height -= delta * 0.66f;
@@ -82,14 +86,14 @@ namespace Rhythmic
 		{
 			if (catchers == 0)
 			{
-				for (unsigned int i = 0; i < 5; i++)
+				for (unsigned int i = 0; i < 6; i++)
 				{
 					m_catchers[i].hit_height = g_catcher_hitHeight;
 				}
 				return;
 			}
 
-			for (unsigned int i = 0; i < 5; i++)
+			for (unsigned int i = 0; i < 6; i++)
 			{
 				if (catchers & (1 << i))
 					m_catchers[i].hit_height = g_catcher_hitHeight;
@@ -100,7 +104,7 @@ namespace Rhythmic
 	int CatcherManager::GetCatchersActive()
 	{
 		int ret = 0;
-		for (unsigned int i = 0; i < 5; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			if (m_catchers[i].active)
 				ret |= (1 << m_catchers[i].type);
@@ -108,9 +112,41 @@ namespace Rhythmic
 		return ret;
 	}
 
+	int CatcherManager::GetLanesActive()
+	{
+		
+		int ret = 0;
+
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			if (m_catchers[i].active) {
+				ret |= (1 << m_catchers[i].type);
+			}				
+		}
+
+		for (unsigned int i = 3; i < 6; i++) {
+			if (m_catchers[i].active) {
+				switch (m_catchers[i].type) {
+				case CATCHER_TYPE_BLUE:
+					ret |= (ret & CATCHER_GREEN ? CATCHER_BLUE : CATCHER_GREEN);
+					break;
+				case CATCHER_TYPE_ORANGE:
+					ret |= (ret & CATCHER_RED ? CATCHER_ORANGE : CATCHER_RED);
+					break;
+				case CATCHER_TYPE_WHITE:
+					ret |= (ret & CATCHER_YELLOW ? CATCHER_WHITE : CATCHER_YELLOW);
+					break;
+				}
+			}
+			
+		}
+
+		return ret;
+	}
+
 	void CatcherManager::SetActiveCatchers(int active)
 	{
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 			m_catchers[i].active = false;
 		
 		if (active & CATCHER_GREEN)
@@ -123,6 +159,8 @@ namespace Rhythmic
 			m_catchers[3].active = true;
 		if (active & CATCHER_ORANGE)
 			m_catchers[4].active = true;
+		if (active & CATCHER_WHITE)
+			m_catchers[5].active = true;
 	}
 
 	void CatcherManager::SetCatchersActivationStatus(int catcher, bool activated)
@@ -135,13 +173,17 @@ namespace Rhythmic
 
 	Catcher *CatcherManager::operator[](int index)
 	{
-		assert(index < 5);
+		assert(index < 6);
 		return &m_catchers[index];
 	}
 
 	bool CatcherManager::IsDrums()
 	{
 		return m_drums;
+	}
+	bool CatcherManager::IsSix()
+	{
+		return m_six;
 	}
 	unsigned int CatcherManager::Size()
 	{

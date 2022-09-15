@@ -17,6 +17,8 @@ namespace Rhythmic
 	int NoteNumberToDifficulty(int noteNumber);
 	int NoteNumberToPadDrums(int noteNumber);
 	int NoteNumberToPad(int noteNumber);
+	int NoteNumberToPadSixFret(int noteNumber);
+
 
 	bool LoadChartFromMidi(Chart *chart, const std::string &chart_file_name, bool loadHeaderOnly)
 	{
@@ -83,6 +85,15 @@ namespace Rhythmic
 			else if (Util::compareStringCaseInsensitive(type, "part drums") == 0)
 			{
 				LoadNotes(mid[track], *chart, INSTRUMENT_TYPE_DRUMS);
+			}
+			else if (Util::compareStringCaseInsensitive(type, "part guitar ghl") == 0)
+			{
+				LoadNotes(mid[track], *chart, INSTRUMENT_TYPE_6FRET);
+			}
+
+			else if (Util::compareStringCaseInsensitive(type, "part bass ghl") == 0)
+			{
+				LoadNotes(mid[track], *chart, INSTRUMENT_TYPE_6FRETBASS);
 			}
 		}
 
@@ -172,7 +183,7 @@ namespace Rhythmic
 						noteNumber == 111 || // Blue pad to cymbal
 						noteNumber == 112))  // Green pad to cymbal
 						cymbalEvents.push_back(&midEvent);
-					continue;
+					continue;	
 				}
 
 
@@ -187,7 +198,7 @@ namespace Rhythmic
 		 			switch (noteNumber)
 		 			{
 		 				case 65:
-		 				case 66:
+		 				case 66:		
 		 				case 77:
 		 				case 78:
 		 				case 89:
@@ -217,6 +228,9 @@ namespace Rhythmic
 					cNote.note = NoteNumberToPadDrums(noteNumber);
 					if (cNote.note == 2 || cNote.note == 3 || cNote.note == 4)
 						cNote.tryForce |= CHART_NOTE_TRY_CYMBAL;
+				}
+				else if (instrument == INSTRUMENT_TYPE_6FRET || instrument == INSTRUMENT_TYPE_6FRETBASS) {
+					cNote.note = NoteNumberToPadSixFret(noteNumber);
 				}
 				else
 			 		cNote.note = NoteNumberToPad(noteNumber);
@@ -390,13 +404,13 @@ namespace Rhythmic
 
 	int NoteNumberToDifficulty(int noteNumber)
 	{
-		if (noteNumber >= 60 && noteNumber <= 66)
+		if (noteNumber >= 58 && noteNumber <= 66)
 			return NOTES_EASY;
-		else if (noteNumber >= 72 && noteNumber <= 78)
+		else if (noteNumber >= 70 && noteNumber <= 78)
 			return NOTES_MEDIUM;
-		else if (noteNumber >= 84 && noteNumber <= 90)
+		else if (noteNumber >= 82 && noteNumber <= 90)
 			return NOTES_HARD;
-		else if (noteNumber >= 96 && noteNumber <= 102)
+		else if (noteNumber >= 94 && noteNumber <= 110)
 			return NOTES_EXPERT;
 		return -1;
 	}
@@ -420,6 +434,26 @@ namespace Rhythmic
 		if (toNote >= 5)
 			return 0;
 		
+		return toNote;
+	}
+
+	int NoteNumberToPadSixFret(int noteNumber)
+	{
+		// weird 6 fret charting conventions 
+		int toNote = noteNumber % 12;
+
+		if (toNote == 10) {
+			return 7; // Open Note
+		}
+
+		if (toNote > 4)
+			return 0;
+
+		if (toNote == 4)
+			return 8; //8 for black 3 because ghl is weird
+
+		toNote += 1;		
+
 		return toNote;
 	}
 }

@@ -108,6 +108,10 @@ namespace Rhythmic
 
 		ctop.difficulty = player->m_difficulty;
 		ctop.asFrets = ((player->m_instrument == INSTRUMENT_TYPE_DRUMS) && m_drumsIs4Lane) ? 4 : 5;
+		//6 fret
+		if (player->m_instrument == INSTRUMENT_TYPE_6FRET || player->m_instrument == INSTRUMENT_TYPE_6FRETBASS) {
+			ctop.asFrets = 6;
+		}
 
 		ctop.drumCymbalsLoad = (m_drumsIs4Lane && m_drumsIsPro) ?
 			((player->m_settings.useCymbal1 ? (1 << NOTE_2) : 0) |
@@ -128,19 +132,27 @@ namespace Rhythmic
 		m_scoreDisqualifier.drums.autoKick = false;
 		m_scoreDisqualifier.guitar.noStrum = false;
 
-		if (player->m_instrument == INSTRUMENT_TYPE_BASS)
+		//score multiplier, bass can go up to 6
+		if (player->m_instrument == INSTRUMENT_TYPE_BASS || player->m_instrument == INSTRUMENT_TYPE_6FRETBASS)
 			m_maxModifier = 6;
-		else
+		else {
 			m_maxModifier = 4;
-
+		}
+			
+		//creates catcher manager for different instruments
 		if (player->m_instrument == INSTRUMENT_TYPE_DRUMS)
 		{
-			m_catcherManager.Create(true, m_drumsIs4Lane ? 4 : 5);//settings->fourPadDrum ? 4 : 5);
+			m_catcherManager.Create(true, false, m_drumsIs4Lane ? 4 : 5);//settings->fourPadDrum ? 4 : 5);
+		}
+		else if (player->m_instrument == INSTRUMENT_TYPE_6FRET || player->m_instrument == INSTRUMENT_TYPE_6FRETBASS) {
+			m_catcherManager.Create(false, true, 6);
 		}
 		else
 		{
-			m_catcherManager.Create(false, 5);
+			m_catcherManager.Create(false, false, 5);
 		}
+
+
 
 		float songSpeed = (float)GamePlayVariables::g_chartModifiers.m_songSpeed * 0.01f;
 		if (StageSystem::GetInstance()->GetModulePractice()->IsPracticeMode()) songSpeed = 1.0f;
@@ -187,7 +199,7 @@ namespace Rhythmic
 		framesHitOpen.push_back({ 23, 24, 16, 1 });
 		framesHitOpen.push_back({ 23, 25, 16, 1 });
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			m_animStarHit[i].SetFPS(24.0f);
 			m_animStarHit[i].SetFrames(framesStar);
@@ -202,19 +214,19 @@ namespace Rhythmic
 			m_animHit[i].SetSheet(RenderManager::GetSheet("highway_elements"));
 		}
 
-		m_animHit[5].SetFPS(36.0f);
-		m_animHit[5].SetFrames(framesHitOpen);
-		m_animHit[5].Play(ANIM_CONTROL_STOP_ON_END);
-		m_animHit[5].SetFrameIndex(3);
-		m_animHit[5].SetSheet(RenderManager::GetSheet("highway_elements"));
+		m_animHit[6].SetFPS(36.0f);
+		m_animHit[6].SetFrames(framesHitOpen);
+		m_animHit[6].Play(ANIM_CONTROL_STOP_ON_END);
+		m_animHit[6].SetFrameIndex(3);
+		m_animHit[6].SetSheet(RenderManager::GetSheet("highway_elements"));
 
 		std::reverse(framesHitOpen.begin(), (framesHitOpen.begin() + 2));
 
-		m_animStarHit[5].SetFPS(24.0f);
-		m_animStarHit[5].SetFrames(framesHitOpen);
-		m_animStarHit[5].Play(ANIM_CONTROL_STOP_ON_END);
-		m_animStarHit[5].SetFrameIndex(3);
-		m_animStarHit[5].SetSheet(RenderManager::GetSheet("highway_elements"));
+		m_animStarHit[6].SetFPS(24.0f);
+		m_animStarHit[6].SetFrames(framesHitOpen);
+		m_animStarHit[6].Play(ANIM_CONTROL_STOP_ON_END);
+		m_animStarHit[6].SetFrameIndex(3);
+		m_animStarHit[6].SetSheet(RenderManager::GetSheet("highway_elements"));
 
 		//m_offset = glm::vec2(0, 0);
 		//m_offsetEffect = 0;
@@ -318,7 +330,7 @@ namespace Rhythmic
 		if (StageSystem::GetInstance()->IsPlaying())
 		{
 			// Animate the animators
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < 7; i++)
 			{
 				m_animStarHit[i].Animate();
 				m_animHit[i].Animate();
@@ -431,6 +443,7 @@ namespace Rhythmic
 							if (!addedSustainStarpower)
 							{
 								addedSustainStarpower = true;
+								
 								AddToStarpower(delta, timeOffset);
 							}
 							SET_NOTE(sustain, NOTE_FLAG_ADDING_STARPOWER);
@@ -685,11 +698,19 @@ namespace Rhythmic
 				{
 					ChartStarpower currentPhrase = GetStarpowerPhraseFrom(noteIndex);
 					ChartStarpower nextPhrase = GetStarpowerPhraseFrom(noteIndex + removeAmount);
+					
 					if (nextPhrase.timeBegin == -1 || nextPhrase.timeBegin > currentPhrase.timeBegin) // The next note is either not in a phrase, or is in another phrase (-1 = no phrase, here just in case)
+					{
 						giveStarpower = true;
+					}
+						
 				}
 				else
+				{
 					giveStarpower = true;
+				}
+					
+					
 			}
 			
 			if (giveStarpower)
@@ -782,6 +803,7 @@ namespace Rhythmic
 						break;
 				}
 			}
+			
 			starpower++;
 		}
 
@@ -913,6 +935,7 @@ namespace Rhythmic
 			if (note.time < i->timeBegin)
 				break;
 			if (note.time >= i->timeBegin && note.time < i->timeEnd)
+				
 				return *i;
 		}
 		return { 0, 0, 0, -1, -1 };

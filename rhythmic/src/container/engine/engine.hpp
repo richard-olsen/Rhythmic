@@ -21,6 +21,7 @@ namespace Rhythmic
 
 		bool m_antiGhost = false;
 	};
+
 	struct EngineDrumsVariables // Size: 16 bytes
 	{
 		int m_rangeCatcher = 150;

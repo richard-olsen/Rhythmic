@@ -134,7 +134,7 @@ namespace Rhythmic
 			batcher->Draw();
 		}
 
-
+		bool six = (instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRET || instrument->GetInstrumentType() == INSTRUMENT_TYPE_6FRETBASS);
 		
 
 		billboard->Use();
@@ -170,7 +170,7 @@ namespace Rhythmic
 		const std::vector<unsigned int> &activeSustains = instrument->GetActiveSustains();
 		const std::vector<SustainMissData> &missedSustains = instrument->GetMissedSustains();
 		const std::deque<WhammyEffectData> &whammyEffect = instrument->GetWhammyEffectData();
-		m_noteRenderer.RenderSustains(*cManager, *notes, time, instrument->GetNoteCutoff(), activeSustains, missedSustains, whammyEffect, instrument->IsStarpowerActive(), (bool)settings->flip, noteSpeed);
+		m_noteRenderer.RenderSustains(*cManager, *notes, time, instrument->GetNoteCutoff(), activeSustains, missedSustains, whammyEffect, instrument->IsStarpowerActive(), (bool)settings->flip, six, noteSpeed);
 
 		billboard->Use();
 
@@ -300,6 +300,15 @@ namespace Rhythmic
 			starPowerAnims[3].Draw(animXY + glm::vec2(CATCHER_POS_4_4 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(0, 1, 1, 1), false);
 			starPowerAnims[5].Draw(glm::vec2(-1.4f, 0.2f), glm::vec2(2.8f, -0.2f), glm::vec4(0, 1, 1, 1), false);
 		}
+		else if (instrument->GetCatcherManager()->Size() == 6) {
+			starPowerAnims[0].Draw(animXY + glm::vec2(CATCHER_POS_6_1 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(0, 1, 1, 1), false);
+			starPowerAnims[1].Draw(animXY + glm::vec2(CATCHER_POS_6_2, 0), animSize, glm::vec4(0, 1, 1, 1), false);
+			starPowerAnims[2].Draw(animXY + glm::vec2(CATCHER_POS_6_3 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(0, 1, 1, 1), false);
+			starPowerAnims[3].Draw(animXY + glm::vec2(CATCHER_POS_6_4 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(0, 1, 1, 1), false);
+			starPowerAnims[4].Draw(animXY + glm::vec2(CATCHER_POS_6_5, 0), animSize, glm::vec4(0, 1, 1, 1), false);
+			starPowerAnims[5].Draw(animXY + glm::vec2(CATCHER_POS_6_6 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(0, 1, 1, 1), false);
+			starPowerAnims[6].Draw(glm::vec2(-1.4f, 0.2f), glm::vec2(2.8f, -0.2f), glm::vec4(0, 1, 1, 1), false);
+		}
 		else
 		{
 			starPowerAnims[0].Draw(animXY + glm::vec2(CATCHER_POS_5_1 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(0, 1, 1, 1), false);
@@ -320,6 +329,15 @@ namespace Rhythmic
 			hitAnims[2].Draw(animXY + glm::vec2(CATCHER_POS_4_3 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[2], false);
 			hitAnims[3].Draw(animXY + glm::vec2(CATCHER_POS_4_4 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[3], false);
 			hitAnims[5].Draw(glm::vec2(-1.4f, 0.2f), glm::vec2(2.8f, -0.2f), starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[5], false);
+		}
+		else if (instrument->GetCatcherManager()->Size() == 6) {
+			hitAnims[0].Draw(animXY + glm::vec2(CATCHER_POS_6_1 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[1], false);
+			hitAnims[1].Draw(animXY + glm::vec2(CATCHER_POS_6_2, 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[2], false);
+			hitAnims[2].Draw(animXY + glm::vec2(CATCHER_POS_6_3 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[3], false);
+			hitAnims[3].Draw(animXY + glm::vec2(CATCHER_POS_6_4 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[1], false);
+			hitAnims[4].Draw(animXY + glm::vec2(CATCHER_POS_6_5, 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[2], false);
+			hitAnims[5].Draw(animXY + glm::vec2(CATCHER_POS_6_6 * (settings->flip ? -1 : 1), 0), animSize, glm::vec4(1, 1, 1, 1.5f), false); //starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[3], false);
+			hitAnims[6].Draw(glm::vec2(-1.4f, 0.2f), glm::vec2(2.8f, -0.2f), starpowerActive ? glm::vec4(0, 1, 1, 1) : g_colors[5], false);
 		}
 		else
 		{

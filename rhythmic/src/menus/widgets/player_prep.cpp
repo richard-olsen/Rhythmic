@@ -131,6 +131,12 @@ namespace Rhythmic
 		if (m_chart->supports[INSTRUMENT_TYPE_BASS])
 			m_buttons.AddButton(new WidgetButton("Bass", [this, player]() { player->m_instrument = INSTRUMENT_TYPE_BASS; player->m_drumsUseCymbals = false; m_page = -2; return BUTTON_FINISHED; }));
 
+		if (m_chart->supports[INSTRUMENT_TYPE_6FRET])
+			m_buttons.AddButton(new WidgetButton("6 Fret Guitar", [this, player]() { player->m_instrument = INSTRUMENT_TYPE_6FRET; player->m_drumsUseCymbals = false; m_page = -2; return BUTTON_FINISHED; }));
+
+		if (m_chart->supports[INSTRUMENT_TYPE_6FRETBASS])
+			m_buttons.AddButton(new WidgetButton("6 Fret Bass", [this, player]() { player->m_instrument = INSTRUMENT_TYPE_6FRETBASS; player->m_drumsUseCymbals = false; m_page = -2; return BUTTON_FINISHED; }));
+
 		if (m_chart->supports[INSTRUMENT_TYPE_DRUMS])
 		{
 			m_buttons.AddButton(new WidgetButton("Drums", [this, player]() { player->m_instrument = INSTRUMENT_TYPE_DRUMS; player->m_drumsUseCymbals = false; m_page = -2; return BUTTON_FINISHED; }));
@@ -158,7 +164,7 @@ namespace Rhythmic
 		m_buttons.AddButton(new WidgetButton("Ready", [this]() { m_page = -4; return BUTTON_FINISHED; }));
 
 		// Guitar
-		if (player->m_instrument == INSTRUMENT_TYPE_GUITAR || player->m_instrument == INSTRUMENT_TYPE_BASS) {
+		if (player->m_instrument == INSTRUMENT_TYPE_GUITAR || player->m_instrument == INSTRUMENT_TYPE_BASS || player->m_instrument == INSTRUMENT_TYPE_6FRET || player->m_instrument == INSTRUMENT_TYPE_6FRETBASS) {
 			// All note types
 			{
 				WidgetButton *button = new WidgetButton("All Strums");

@@ -106,6 +106,7 @@ namespace Rhythmic
 
 	void MusicPlayer::SetPlaybackSpeed(float speed)
 	{
+		m_playbackSpeed = speed;
 	}
 
 	float MusicPlayer::GetPlaybackSpeed()

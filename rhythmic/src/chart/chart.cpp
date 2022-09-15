@@ -308,8 +308,7 @@ namespace Rhythmic
 
 			if (values.chord > 1)
 				SET_NOTE(note, NOTE_FLAG_IS_CHORD);
-
-			SET_NOTE(note, NOTE_FLAG_STRUM);
+				SET_NOTE(note, NOTE_FLAG_STRUM);
 
 			if ((values.fretCount == 5) && (note.note == NOTE_2 || note.note == NOTE_4))
 				SET_NOTE(note, NOTE_FLAG_CYMBAL);
@@ -331,6 +330,165 @@ namespace Rhythmic
 			}
 		}
 		return values.chord;
+	}
+
+	int _calculate6Fret(CalculateInstrument& values)
+	{
+		int target = 0;
+
+		auto modifier = values.modifiers->begin();
+
+		Note& baseNote = (*values.desc->notes)[values.index];
+
+		while (modifier != values.modifiers->end())
+		{
+			if (modifier->position == baseNote.chartPos)
+			{
+				if (modifier->note == 5) // Force Flag
+					target = 1;
+				if (modifier->note == 6) // Tap Flag
+					target = 2;
+				
+
+				modifier = values.modifiers->erase(modifier);
+				continue;
+			}
+
+			if (modifier->position > baseNote.chartPos)
+				break;
+
+			modifier++;
+		}
+
+		
+		int largestSustain = 0;
+		bool bar1 = false, bar2 = false, bar3 = false;
+
+		int b1 = 0, b2 = 0, b3 = 0;
+
+		for (int n = 0; n < values.chord; n++)
+		{
+			Note& note = (*values.desc->notes)[values.index + n];
+
+			note.isBar = false;
+
+			if (note.chartLen > largestSustain)
+				largestSustain = note.chartLen;
+
+			note.time = GetAdjustedTimeFromPosition(note.chartPos, *values.chart) + values.audioCalibration + values.chart->songData.offset;
+			note.sustain = GetAdjustedTimeFromPosition(note.chartLen + note.chartPos, *values.chart) + values.audioCalibration + values.chart->songData.offset;
+			values.position = note.chartPos;
+				
+
+			if (values.chord > 1)
+			{
+				SET_NOTE(note, NOTE_FLAG_IS_CHORD);
+							
+			}
+				
+
+			if (values.spNote)
+				SET_NOTE(note, NOTE_FLAG_IS_STARPOWER);
+
+			switch (note.note) {
+			case NOTE_1:
+				bar1 = true;
+				b1 = values.index;
+				break;
+			case NOTE_2:
+				bar2 = true;
+				b2 = values.index;
+				break;
+			case NOTE_3:
+				bar3 = true;
+				b3 = values.index;
+				break;
+			}
+
+			if (note.note == NOTE_4 && bar1 == true) {
+				Note& prev = (*values.desc->notes)[b1];
+				prev.isBar = true;
+				note.isBar = true;
+				//SET_NOTE(prev, NOTE_FLAG_BAR);
+				//SET_NOTE(note, NOTE_FLAG_BAR);
+			}
+
+			if (note.note == NOTE_5 && bar2 == true) {
+				Note& prev = (*values.desc->notes)[b2];
+				prev.isBar = true;
+				note.isBar = true;
+				//SET_NOTE(prev, NOTE_FLAG_BAR);
+				//SET_NOTE(note, NOTE_FLAG_BAR);
+			}
+
+			if (note.note == NOTE_6 && bar3 == true) {
+				Note& prev = (*values.desc->notes)[b3];
+				prev.isBar = true;
+				note.isBar = true;
+				//SET_NOTE(prev, NOTE_FLAG_BAR);
+				//SET_NOTE(note, NOTE_FLAG_BAR);
+			}
+
+			if (target == 2)
+			{
+				SET_NOTE(note, NOTE_FLAG_TAP);
+				continue;
+			}
+			
+
+			// Forcing the note just flips it's hopo status
+			int flagTargetModifiedHopo = target == 1 ? NOTE_FLAG_STRUM : NOTE_FLAG_HOPO;
+			int flagTargetModifiedStrum = target == 1 ? NOTE_FLAG_HOPO : NOTE_FLAG_STRUM;
+
+			if (note.chartTarget == 0)// A previous note exists
+			{
+				if (values.index - 1 < 0)
+				{
+					SET_NOTE(note, flagTargetModifiedStrum);
+					continue;
+				}
+				// Define rules for HOPOs
+				Note& prevNote = (*values.desc->notes)[values.index - 1];
+
+				if (values.chord == 1)
+				{
+					if ((note.chartPos - prevNote.chartPos <= values.hopoRequirement))
+					{
+						if (IS_NOTE(prevNote, NOTE_FLAG_IS_CHORD))
+							SET_NOTE(note, flagTargetModifiedHopo);
+						else if (prevNote.note != note.note)
+							SET_NOTE(note, flagTargetModifiedHopo);
+						else
+							SET_NOTE(note, flagTargetModifiedStrum);
+					}
+					else
+					{
+						SET_NOTE(note, flagTargetModifiedStrum);
+					}
+				}
+				else
+				{
+					SET_NOTE(note, flagTargetModifiedStrum);
+				}
+			}
+			else if (note.chartTarget & CHART_NOTE_TRY_TAP)
+			{
+				SET_NOTE(note, NOTE_FLAG_TAP);
+			}
+			else if (note.chartTarget & CHART_NOTE_TRY_STRUM)
+			{
+				SET_NOTE(note, NOTE_FLAG_STRUM);
+			}
+			else if (note.chartTarget & CHART_NOTE_TRY_HOPO)
+			{
+				SET_NOTE(note, NOTE_FLAG_HOPO);
+			}
+
+		}
+
+		values.desc->m_baseScore += (values.chord * SCORE_PER_NOTE) + (largestSustain > 0 ? ScoreCalculateFull(values.chart, largestSustain) : 0);
+
+		return 1;
 	}
 
 	bool _insideStarpower(std::vector<ChartStarpower> *phrases, unsigned int chartPos)
@@ -385,15 +543,50 @@ namespace Rhythmic
 				}
 				else if (cNote.note <= 4 || cNote.note == 7)
 				{
+					note.isBar = false;
 					note.note = cNote.note == 7 ? NOTE_OPEN : cNote.note;
 					desc.notes->push_back(note);
 				}
 				break;
 			case INSTRUMENT_TYPE_DRUMS:
+				note.isBar = false;
 				note.note = cNote.note == 0 ? NOTE_OPEN : cNote.note - 1;
 				desc.notes->push_back(note);
 				break;
+			//both for bass and guitar 6 fret
+			case INSTRUMENT_TYPE_6FRET:
+			case INSTRUMENT_TYPE_6FRETBASS:
+				if ((cNote.note == 6) || cNote.note == 5) {
+					modifiers.push_back(cNote);
+				}
+				else if (cNote.note <= 4 || cNote.note == 8 || cNote.note == 7) {
+					note.note = cNote.note == 7 ? NOTE_OPEN : cNote.note;
+					
+					switch (note.note) {
+					case 0:
+						note.note = NOTE_4;
+						break;
+					case 1:
+						note.note = NOTE_5;
+						break;
+					case 2:
+						note.note = NOTE_6;
+						break;
+					case 3:
+						note.note = NOTE_1;
+						break;
+					case 4:
+						note.note = NOTE_2;
+						break;
+					case 8:
+						note.note = NOTE_3;
+						break;
+					}
+					
+					desc.notes->push_back(note);
+				}
 			}
+			
 		}
 
 		// Sort through the notes and organize them for ease of use.
@@ -420,6 +613,9 @@ namespace Rhythmic
 		ci.modifiers = &modifiers;
 		ci.hopoRequirement = hopoRequirement;
 		ci.fretCount = desc.asFrets;
+		if (desc.instrument == INSTRUMENT_TYPE_6FRET || desc.instrument == INSTRUMENT_TYPE_6FRETBASS) {
+			ci.fretCount = 6;
+		}
 		ci.loadCymbals = desc.drumCymbalsLoad;
 
 		ci.index = 0;
@@ -448,7 +644,13 @@ namespace Rhythmic
 			case INSTRUMENT_TYPE_DRUMS:
 				notesToCount = _calculateDrums(ci);
 				break;
+			case INSTRUMENT_TYPE_6FRET:
+			case INSTRUMENT_TYPE_6FRETBASS:
+				notesToCount = _calculate6Fret(ci);
+				break;
 			}
+			
+
 
 			noteCount += notesToCount;
 			ci.index += ci.chord;

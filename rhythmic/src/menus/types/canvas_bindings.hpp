@@ -371,13 +371,13 @@ namespace Rhythmic
 				case 0:
 					text = "~~~~ Basics ~~~~";
 					break;
-				case 11:
+				case 12:
 					text = "~~~~ Guitar / Bass / Keys ~~~~";
 					break;
-				case 13:
+				case 14:
 					text = "~~~~ Drums ~~~~";
 					break;
-				case 17:
+				case 18:
 					text = "~~~~ Cymbals for non RB drums ~~~~";
 					break;
 				}

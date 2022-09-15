@@ -10,7 +10,9 @@ namespace Rhythmic
 		NOTE_3 = 2,
 		NOTE_4 = 3,
 		NOTE_5 = 4,
-		NOTE_OPEN = 5
+		NOTE_6 = 5,
+		NOTE_OPEN = 6,
+
 	};
 
 	enum NoteFlag
@@ -22,7 +24,8 @@ namespace Rhythmic
 		NOTE_FLAG_IS_STARPOWER = (1 << 4),
 		NOTE_FLAG_ADDING_STARPOWER = (1 << 5),
 		NOTE_FLAG_CYMBAL = (1 << 6),
-		NOTE_FLAG_HIT = (1 << 7)				// The last note flag that is available
+		NOTE_FLAG_HIT = (1 << 7),
+		//NOTE_FLAG_BAR = (1 << 8) // The last note flag that is available
 	};
 
 	struct Note
@@ -36,6 +39,7 @@ namespace Rhythmic
 
 		unsigned char flags; // Has a couple of flags that the game will use
 		float lastScoreCheck;
+		bool isBar;
 
 		//bool isSustain;		// Determins if the note is a sustain note
 		//bool isDouble;		// Tells the game that the note is double and should check notes behind or in front for the other(s)

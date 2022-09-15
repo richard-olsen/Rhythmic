@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "instrument/instrument_5fret.hpp"
+#include "instrument/instrument_6fret.hpp"
 #include "instrument/instrument_drum.hpp"
 #include "instrument/instrument_calibrate.hpp"
 
@@ -64,6 +65,8 @@ namespace Rhythmic
 			m_instrument = new Instrument5Fret();
 		else if (m_parent->m_instrument == INSTRUMENT_TYPE_DRUMS)
 			m_instrument = new InstrumentDrums();
+		else if (m_parent->m_instrument == INSTRUMENT_TYPE_6FRET || m_parent->m_instrument == INSTRUMENT_TYPE_6FRETBASS)
+			m_instrument = new Instrument6Fret();
 
 		m_instrument->Create(m_parent);
 

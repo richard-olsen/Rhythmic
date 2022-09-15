@@ -306,7 +306,7 @@ namespace Rhythmic
 		m_duration = m_songAudio.GetSyncLength();
 
 		m_songChart = LoadChart(songPath);
-		if (!m_songChart.supports[0] && !m_songChart.supports[1] && !m_songChart.supports[2])
+		if (!m_songChart.supports[0] && !m_songChart.supports[1] && !m_songChart.supports[2] && !m_songChart.supports[3] && !m_songChart.supports[4] && !m_songChart.supports[5])
 			return false;
 
 		GenBeatlines(m_songChart, &beatlines);

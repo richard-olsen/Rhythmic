@@ -20,7 +20,7 @@ endif ()
 
 include_directories("${WarmfulsEngine_SOURCE_DIR}/include/" ${RHYTHM_INCLUDES})
 
-add_executable(rhythmic ${FILES_SRCS} ${FILES_HDRS} ${FILES_MISC})
+add_executable(rhythmic ${FILES_SRCS} ${FILES_HDRS} ${FILES_MISC} "src/game/instrument/instrument_6fret.cpp" "src/game/instrument/instrument_6fret.hpp")
 target_link_libraries(
 rhythmic
 wge
